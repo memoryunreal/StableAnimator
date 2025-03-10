@@ -40,6 +40,7 @@ StableAnimator: High-Quality Identity-Preserving Human Image Animation
 Current diffusion models for human image animation struggle to ensure identity (ID) consistency. This paper presents StableAnimator, <b>the first end-to-end ID-preserving video diffusion framework, which synthesizes high-quality videos without any post-processing, conditioned on a reference image and a sequence of poses.</b> Building upon a video diffusion model, StableAnimator contains carefully designed modules for both training and inference striving for identity consistency. In particular, StableAnimator begins by computing image and face embeddings with off-the-shelf extractors, respectively and face embeddings are further refined by interacting with image embeddings using a global content-aware Face Encoder. Then, StableAnimator introduces a novel distribution-aware ID Adapter that prevents interference caused by temporal layers while preserving ID via alignment. During inference, we propose a novel Hamilton-Jacobi-Bellman (HJB) equation-based optimization to further enhance the face quality. We demonstrate that solving the HJB equation can be integrated into the diffusion denoising process, and the resulting solution constrains the denoising path and thus benefits ID preservation. Experiments on multiple benchmarks show the effectiveness of StableAnimator both qualitatively and quantitatively.
 
 ## News
+* `[2025-3-10]`:🔥The codes of HJB-based face optimization are released!
 * `[2025-2-27]`:🔥 StableAnimator is accepted by CVPR2025🎉🎉🎉. The code of HJB-based face optimization will be released in March. Stay tuned!
 * `[2024-12-13]`:🔥 The training code and training tutorial are released! You can train/finetune your own StableAnimator on your own collected datasets! Other codes will be released very soon. Stay tuned!
 * `[2024-12-10]`:🔥 The gradio interface is released! Many thanks to [@gluttony-10](https://space.bilibili.com/893892) for his contribution! Other codes will be released very soon. Stay tuned!
@@ -55,9 +56,8 @@ Current diffusion models for human image animation struggle to ensure identity (
 - [x] Data Pre-Processing Code (Skeleton Extraction)
 - [x] Data Pre-Processing Code (Human Face Mask Extraction)
 - [x] Training Code
-- [ ] Evaluation Dataset
+- [x] Inference Code with HJB-based Face Optimization
 - [ ] StableAnimator-pro
-- [ ] Inference Code with HJB-based Face Optimization
 
 ## Quickstart
 
@@ -183,7 +183,7 @@ python face_mask_extraction.py --image_folder="path/StableAnimator/inference/you
 ```
 `path/StableAnimator/inference/your_case/target_images` contains multiple `.png` files. The obtained masks are saved in `path/StableAnimator/inference/your_case/faces`.
 
-### Model inference
+### Base Model inference
 A sample configuration for testing is provided as `command_basic_infer.sh`. You can also easily modify the various configurations according to your needs.
 
 ```
@@ -204,6 +204,16 @@ Additionally, you can also run the following command to launch a Gradio interfac
 ```
 python app.py
 ```
+
+### Model inference with HJB-based Face Optimization
+A sample configuration for testing is provided as `command_op_infer.sh`. You can also easily modify the various configurations according to your needs.
+```
+bash command_op_infer.sh
+```
+`--num_optimization_iter`, `--start_refine_step`, and `--end_refine_step` refer to the epoch number of HJB-based face optimization at each timestep, the start time of the optimization, and the end time of the optimization, respectively.
+These three parameters need to be adaptively modified in certain situations based on the specific input videos and reference image.
+`--face_embedding_extractor_weight_path` can be downloaded from [HuggingFace](https://huggingface.co/FrancisRing/StableAnimator/tree/main/Animation).
+Notably, you should extract the corresponding face masks before conducting our JHB-based optimization. For more details about human face extraction, please refer to the Human Face Mask Extraction Section in the README file.
 
 ### Model Training
 <b>🔥It’s worth noting that if you’re looking to train a conditioned Stable Video Diffusion (SVD) model, this training tutorial will also be helpful.🔥</b>
