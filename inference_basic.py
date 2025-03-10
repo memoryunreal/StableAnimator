@@ -264,8 +264,8 @@ if __name__ == "__main__":
                 # print(f"This is AnimationIDAttnProcessor: {name}")
                 layer_name = name.split(".processor")[0]
                 weights = {
-                    "to_k_ip.weight": unet_svd[layer_name + ".to_k.weight"],
-                    "to_v_ip.weight": unet_svd[layer_name + ".to_v.weight"],
+                    "id_to_k.weight": unet_svd[layer_name + ".to_k.weight"],
+                    "id_to_v.weight": unet_svd[layer_name + ".to_v.weight"],
                 }
                 attn_procs[name] = AnimationIDAttnNormalizedProcessor(hidden_size=hidden_size, cross_attention_dim=cross_attention_dim, rank=lora_rank)
                 attn_procs[name].load_state_dict(weights, strict=False)
