@@ -18,49 +18,63 @@ def download_dataset():
     # Output path
     output_path = 'data/Human_Attribute_Pretrain.tar.gz'
     
-    # Google Drive API token
-    token = "ya29.a0AeXRPp7xhr7soEn7a1ooY_QYZ9fbC91IAohYvYNQkEDYMzp0UOywTdcaTbZIOgNQSb8XO14TyOa2jNrAybFfGuxb65Dp1DPNLmEDI_p5IxZMnjuH33Njl_hmrY9-0mgpigrpsgxdTksPOSbaf8lbEJc9-l02K9Z9IVoPnyzmaCgYKAewSARMSFQHGX2Micl87czM07W71B16Qwc4mIA0175"
+    # Prompt user for the Google Drive API token
+    print("Please enter your Google Drive API token.")
+    print("You can get a token by:")
+    print("1. Going to https://developers.google.com/oauthplayground/")
+    print("2. Select Drive API v3 in the list on the right")
+    print("3. Click 'Authorize APIs'")
+    print("4. Click 'Exchange authorization code for tokens'")
+    print("5. Copy the 'Access token' value")
+    token = input("Enter your Google Drive API token: ")
     
-    print(f"Downloading dataset with Google Drive API token...")
+    if not token:
+        print("No token provided. Falling back to gdown method.")
+        use_token_method = False
+    else:
+        use_token_method = True
+    
+    print(f"Downloading dataset...")
     print("This might take a while depending on your internet connection...")
     
     # Method 1: Using direct download with token
-    try:
-        # Direct download URL
-        url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media"
-        
-        # Headers with authorization
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "User-Agent": "Mozilla/5.0"
-        }
-        
-        print(f"Starting direct download using Google API...")
-        
-        # Stream download to handle large files
-        with requests.get(url, headers=headers, stream=True, verify=False) as r:
-            r.raise_for_status()
-            total_size = int(r.headers.get('content-length', 0))
-            print(f"Total file size: {total_size / (1024*1024*1024):.2f} GB")
+    if use_token_method:
+        try:
+            # Direct download URL
+            url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media"
             
-            with open(output_path, 'wb') as f:
-                downloaded = 0
-                for chunk in r.iter_content(chunk_size=8192*1024):  # 8MB chunks
-                    if chunk:
-                        f.write(chunk)
-                        downloaded += len(chunk)
-                        # Print progress
-                        if total_size > 0:
-                            percent = (downloaded / total_size) * 100
-                            print(f"\rDownloaded: {downloaded / (1024*1024*1024):.2f} GB ({percent:.1f}%)", end="")
+            # Headers with authorization
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "User-Agent": "Mozilla/5.0"
+            }
             
-            print(f"\nDownload completed! File saved to: {output_path}")
-            return
-    except Exception as e:
-        print(f"Direct download failed: {str(e)}")
-        print("Trying alternative method with gdown...")
+            print(f"Starting direct download using Google API...")
+            
+            # Stream download to handle large files
+            with requests.get(url, headers=headers, stream=True, verify=False) as r:
+                r.raise_for_status()
+                total_size = int(r.headers.get('content-length', 0))
+                print(f"Total file size: {total_size / (1024*1024*1024):.2f} GB")
+                
+                with open(output_path, 'wb') as f:
+                    downloaded = 0
+                    for chunk in r.iter_content(chunk_size=8192*1024):  # 8MB chunks
+                        if chunk:
+                            f.write(chunk)
+                            downloaded += len(chunk)
+                            # Print progress
+                            if total_size > 0:
+                                percent = (downloaded / total_size) * 100
+                                print(f"\rDownloaded: {downloaded / (1024*1024*1024):.2f} GB ({percent:.1f}%)", end="")
+                
+                print(f"\nDownload completed! File saved to: {output_path}")
+                return
+        except Exception as e:
+            print(f"Direct download failed: {str(e)}")
+            print("Trying alternative method with gdown...")
     
-    # Method 2: Fall back to gdown if direct download fails
+    # Method 2: Fall back to gdown if direct download fails or no token provided
     max_retries = 3
     retry_delay = 5  # seconds
     
